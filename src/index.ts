@@ -47,6 +47,7 @@ async function setup() {
         default:
           console.error(new Date(), 'Unknown response -> ', response.Response);
       }
+      channel.ack(message);
     }
   });
 }
