@@ -42,7 +42,7 @@ async function setup() {
 
           /* Send it back to queue */
           const routingKey = `tracker.${trackerId}.notification.respond`;
-          channel.publish('', routingKey, message.content);
+          channel.publish('tracker-event', routingKey, message.content);
           break;
         default:
           console.error(new Date(), 'Unknown response -> ', response.Response);
