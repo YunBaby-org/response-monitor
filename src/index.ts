@@ -2,11 +2,28 @@ import amqp from 'amqplib';
 import {getURI} from './credentials';
 import {Response} from './response';
 import {getTrackerId, getPrefetch} from './utility/getTrackerId';
+import {sleep} from './utility/sleep';
+
+async function createChannel(retry: number) {
+  for (let i = 0; i < retry; i++) {
+    try {
+      return await amqp.connect(getURI());
+    } catch (e) {
+      console.log('Connect to amqp channel failed, retry after 2 second:', e);
+    }
+    if (i == retry - 1) break;
+    else await sleep(2000);
+  }
+  console.log(
+    `Failed to setup connection after ${retry} attempts, force stop the program`
+  );
+  process.exit(2);
+}
 
 async function setup() {
   console.log(new Date(), 'Intialize response monitor');
 
-  const connection = await amqp.connect(getURI());
+  const connection = await createChannel(5);
   const channel = await connection.createConfirmChannel();
 
   console.log(new Date(), 'Consumer prefetch size:', getPrefetch());
