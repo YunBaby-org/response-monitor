@@ -1,6 +1,6 @@
 {
   "name": "",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
@@ -14,10 +14,14 @@
     "check": "gts check",
     "clean": "gts clean",
     "compile": "tsc",
+    "compile-production": "tsc -p ./tsconfig.prod.json",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check"
+    "posttest": "npm run check",
+    "version:major": "npm --no-git-tag-version version major",
+    "version:minor": "npm --no-git-tag-version version minor",
+    "version:patch": "npm --no-git-tag-version version patch"
   },
   "devDependencies": {
     "@types/amqplib": "^0.5.13",
