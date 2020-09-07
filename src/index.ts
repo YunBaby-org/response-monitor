@@ -1,8 +1,9 @@
 import amqp from 'amqplib';
 import {getURI} from './credentials';
 import {Response} from './response';
-import {getTrackerId, getPrefetch} from './utility/getTrackerId';
+import {getPrefetch, getTrackerId} from './utility/getTrackerId';
 import {sleep} from './utility/sleep';
+import {AmqpConnectionFailureException} from './exceptions/AmqpConnectionFailureException';
 
 async function createChannel(retry: number) {
   for (let i = 0; i < retry; i++) {
@@ -11,29 +12,31 @@ async function createChannel(retry: number) {
     } catch (e) {
       console.log('Connect to amqp channel failed, retry after 2 second:', e);
     }
-    if (i == retry - 1) break;
+    if (i === retry - 1) break;
     else await sleep(2000);
   }
   console.log(
     `Failed to setup connection after ${retry} attempts, force stop the program`
   );
-  process.exit(2);
+  throw new AmqpConnectionFailureException(
+    `Cannot establish connection to ${getURI()}`
+  );
 }
 
 async function setup() {
-  console.log(new Date(), 'Intialize response monitor');
+  console.log(new Date(), 'Initialize response monitor');
 
   const connection = await createChannel(5);
   const channel = await connection.createConfirmChannel();
 
   console.log(new Date(), 'Consumer prefetch size:', getPrefetch());
-  channel.prefetch(getPrefetch(), false);
+  await channel.prefetch(getPrefetch(), false);
 
   console.log(new Date(), 'Assert queues');
-  channel.assertQueue('monitor.responses', {durable: true});
+  await channel.assertQueue('monitor.responses', {durable: true});
 
   console.log(new Date(), 'Setup consumer');
-  channel.consume('monitor.responses', message => {
+  await channel.consume('monitor.responses', message => {
     if (message) {
       const response = JSON.parse(message.content.toString('utf8')) as Response;
       const trackerId = getTrackerId(message);
@@ -54,13 +57,14 @@ async function setup() {
         case 'ScanWifiSignal':
         case 'SetAutoReport':
         case 'SetPowerSaving':
-        case 'SetReportInterval':
+        case 'SetReportInterval': {
           /* TODO: Store it into database */
 
           /* Send it back to queue */
           const routingKey = `tracker.${trackerId}.notification.respond`;
           channel.publish('tracker-event', routingKey, message.content);
           break;
+        }
         default:
           console.error(new Date(), 'Unknown response -> ', response.Response);
       }
