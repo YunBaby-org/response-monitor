@@ -26,11 +26,18 @@ export function getRabbitURI() {
   );
 }
 
-export function getPostgresURI() {
+export function getPostgresSetup() {
   return {
     host: process.env.DATABASE_HOST || 'localhost',
     user: process.env.DATABASE_USRE || 'postgres',
     password: process.env.DATABASE_PASS || 'password',
     database: process.env.DATABASE_NAME || 'postgres',
+    port: parseInt(process.env.DATABASE_PORT || '5432'),
   };
 }
+
+export function getPostgresURI() {
+  const {host, user, database, port} = getPostgresSetup();
+  return `postgresql://${user}@${host}:${port}/${database}`;
+}
+

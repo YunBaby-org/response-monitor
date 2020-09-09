@@ -2,7 +2,7 @@ import amqp from 'amqplib';
 import {Client} from 'pg';
 import {ResponseBuffer} from './response-buffer';
 import {Looper} from './looper';
-import {getRabbitURI, getPostgresURI} from './credentials';
+import {getRabbitURI, getPostgresURI, getPostgresSetup} from './credentials';
 import {getPrefetch, getTrackerId} from './utility/getTrackerId';
 import {Response} from './response';
 import {insertResponse} from './query/tracker-requests.queries';
@@ -25,7 +25,7 @@ export default class Application {
   async start() {
     appLogger.info('Starting response monitor');
     /* Setup database & response buffers */
-    this.client = new Client(getPostgresURI());
+    this.client = new Client(getPostgresSetup());
     await this.client.connect();
     this.buffer = new ResponseBuffer();
     this.looper = new Looper(200, this.onRefreshBuffer.bind(this));
