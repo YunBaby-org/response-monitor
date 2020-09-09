@@ -6,5 +6,5 @@ export function getTrackerId(message: ConsumeMessage) {
 }
 
 export function getPrefetch() {
-  return parseInt(process.env.PREFETCH_SIZE || '10');
+  return parseInt(process.env.PREFETCH_SIZE || '50');
 }

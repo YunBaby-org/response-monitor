@@ -15,7 +15,7 @@ export function getRabbitPort() {
   return process.env.RABBITMQ_PORT || '5672';
 }
 
-export function getURI() {
+export function getRabbitURI() {
   const username = getUsername();
   const password = getPasswordSync();
   const hostname = getRabbitHost();
@@ -24,4 +24,13 @@ export function getURI() {
     process.env.RABBITMQ_URI ||
     `amqp://${username}:${password}@${hostname}:${port}`
   );
+}
+
+export function getPostgresURI() {
+  return {
+    host: process.env.DATABASE_HOST || 'localhost',
+    user: process.env.DATABASE_USRE || 'postgres',
+    password: process.env.DATABASE_PASS || 'password',
+    database: process.env.DATABASE_NAME || 'postgres',
+  };
 }

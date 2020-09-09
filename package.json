@@ -21,15 +21,21 @@
     "posttest": "npm run check",
     "version:major": "npm --no-git-tag-version version major",
     "version:minor": "npm --no-git-tag-version version minor",
-    "version:patch": "npm --no-git-tag-version version patch"
+    "version:patch": "npm --no-git-tag-version version patch",
+    "pgtyped": "pgtyped -w -c pgtyped.config.json"
   },
   "devDependencies": {
     "@types/amqplib": "^0.5.13",
     "@types/node": "^13.11.1",
-    "gts": "^2.0.2",
-    "typescript": "^3.8.3"
+    "@types/pg": "^7.14.4",
+    "gts": "^2.0.2"
   },
   "dependencies": {
-    "amqplib": "^0.6.0"
+    "@pgtyped/cli": "^0.8.2",
+    "@pgtyped/query": "^0.8.2",
+    "amqplib": "^0.6.0",
+    "pg": "^8.3.3",
+    "typescript": "^3.9.7",
+    "winston": "^3.3.3"
   }
 }
