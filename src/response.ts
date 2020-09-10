@@ -1,7 +1,9 @@
+export type StatusResult = 'Success' | 'Failed';
+
 export interface Response {
   Response: ResponseType;
   id: string;
-  Status: string;
+  Status: StatusResult;
   Result: object;
 }
 

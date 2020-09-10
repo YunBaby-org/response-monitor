@@ -49,6 +49,9 @@ export default class Application {
       this.onConsume(message);
     } catch (e) {
       appLogger.error(e);
+      appLogger.error('Failed to handle response, message unacked');
+      appLogger.error(`Payload content: ${message.content}`);
+      this.amqpChannel!.nack(message, false, false);
     }
   }
 
@@ -66,6 +69,8 @@ export default class Application {
 
     if (!trackerId)
       throw new CannotResolveTrackerIdError(message.fields.routingKey);
+    if (typeof response.id !== 'string')
+      throw new InvalidResponseIdError(response.id);
 
     switch (response.Response) {
       case 'GetDeviceStatus':
@@ -158,7 +163,7 @@ export default class Application {
               'Failed to save the message into database, message unacked'
             );
             appLogger.error(error);
-            this.amqpChannel!.nack(message, false);
+            this.amqpChannel!.nack(message, false, false);
           });
       }
     }
@@ -174,11 +179,14 @@ export default class Application {
 }
 
 class UnknownResponseError extends Error {
-  message = 'Invalid Response Type';
+  message = 'Invalid response type';
 }
 class UnableToStoreAllResponseError extends Error {
   message = 'One of the request is invalid';
 }
 class CannotResolveTrackerIdError extends Error {
   message = 'Unknown tracker id';
+}
+class InvalidResponseIdError extends Error {
+  message = 'Invalid response id';
 }
