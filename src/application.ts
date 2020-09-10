@@ -141,25 +141,35 @@ export default class Application {
       );
 
       /* For all requests */
-      for (let index = 0; index < buffer.responseBuffer.length; index++) {
-        const response = buffer.responseBuffer[index];
-        const message = buffer.state[index] as amqp.ConsumeMessage;
+      try {
+        for (let index = 0; index < buffer.responseBuffer.length; index++) {
+          const response = buffer.responseBuffer[index];
+          const message = buffer.state[index] as amqp.ConsumeMessage;
 
-        /* Attempts to store the single response into db */
-        insertResponse
-          .run({responses: [response]}, this.client!)
-          .then(() => {
-            /* Success: we ack it */
-            this.amqpChannel!.ack(message, false);
-          })
-          .catch(error => {
-            /* Failure: we nack it */
-            appLogger.error(
-              'Failed to save the message into database, message unacked'
-            );
-            appLogger.error(error);
-            this.amqpChannel!.nack(message, false, false);
-          });
+          /* Attempts to store the single response into db */
+          insertResponse
+            .run({responses: [response]}, this.client!)
+            .then(() => {
+              /* Success: we ack it */
+              appLogger.info('Ack 1 message (singular mode)');
+              this.amqpChannel!.ack(message, false);
+            })
+            .catch(error => {
+              /* Failure: we nack it */
+              appLogger.error(
+                'Failed to save the message into database, message unacked'
+              );
+              appLogger.error('Unack 1 message (singular mode)');
+              appLogger.error(error);
+              this.amqpChannel!.nack(message, false, false);
+            });
+        }
+      } catch (e) {
+        appLogger.error(
+          'CRITICAL! failed to perform singular writing to responses, all message unacked and requeued'
+        );
+        const [lastMessage] = buffer.state.slice(-1);
+        this.amqpChannel!.nack(lastMessage as amqp.ConsumeMessage, true, true);
       }
     }
   }
@@ -168,16 +178,10 @@ export default class Application {
     appLogger.info(`Ack ${all ? 'all messages' : '1 message'}`);
     this.amqpChannel!.ack(message as amqp.ConsumeMessage, all);
   }
-  private onResponseSaveFailure() {
-    throw new UnableToStoreAllResponseError();
-  }
 }
 
 class UnknownResponseError extends Error {
   message = 'Invalid response type';
-}
-class UnableToStoreAllResponseError extends Error {
-  message = 'One of the request is invalid';
 }
 class CannotResolveTrackerIdError extends Error {
   message = 'Unknown tracker id';
