@@ -14,8 +14,11 @@ export default class Application {
   private client: Client | undefined;
   private buffer: ResponseBuffer | undefined;
   private looper: Looper | undefined;
+  private stopped: boolean;
 
-  constructor() {}
+  constructor() {
+    this.stopped = false;
+  }
 
   /**
    * start the Application
@@ -42,6 +45,48 @@ export default class Application {
       message => message && this.onPreConsume(message)
     );
     appLogger.info('AMQP connection established');
+
+    this.registerEvents();
+  }
+
+  private registerEvents() {
+    this.client!.on('error', error => {
+      appLogger.error(error);
+      appLogger.error('Postgres connection error');
+      this.stop();
+    });
+    this.client!.on('end', () => {
+      appLogger.warn('Postgres connection closed');
+      this.stop();
+    });
+    this.amqpConnection!.on('error', error => {
+      appLogger.error(error);
+      appLogger.error('RabbitMQ connection error');
+      this.stop();
+    });
+    this.amqpConnection!.on('close', () => {
+      appLogger.warn('RabbitMQ connection closed');
+      this.stop();
+    });
+    process.on('SIGQUIT', () => this.stop());
+    process.on('SIGTERM', () => this.stop());
+    process.on('SIGINT', () => this.stop());
+  }
+
+  private async stop() {
+    function PretendNothingHappened() {}
+    if (!this.stopped) {
+      this.stopped = true;
+      if (this.looper) {
+        this.looper.stopLooper();
+      }
+      appLogger.info('Stopping response monitor...');
+      appLogger.info('Closing RabbitMQ connection');
+      await this.amqpConnection!.close().catch(PretendNothingHappened);
+      appLogger.info('Closing Postgres connection');
+      await this.client!.end().catch(PretendNothingHappened);
+      appLogger.info('Done');
+    }
   }
 
   private onPreConsume(message: amqp.ConsumeMessage) {
