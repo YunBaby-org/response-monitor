@@ -48,7 +48,7 @@ export default class Application {
     try {
       this.onConsume(message);
     } catch (e) {
-      console.error(e);
+      appLogger.error(e);
     }
   }
 
@@ -136,7 +136,9 @@ export default class Application {
           throw error;
         });
     } catch (e) {
-      console.error('[WARNING] fallback to one by one method');
+      appLogger.warn(
+        'Failed to write data in bulk load, fallback to singular writing'
+      );
 
       /* For all requests */
       for (let index = 0; index < buffer.responseBuffer.length; index++) {
@@ -152,8 +154,10 @@ export default class Application {
           })
           .catch(error => {
             /* Failure: we nack it */
-            console.error('[ERROR] failed to store response, message unacked.');
-            console.error(error);
+            appLogger.error(
+              'Failed to save the message into database, message unacked'
+            );
+            appLogger.error(error);
             this.amqpChannel!.nack(message, false);
           });
       }
