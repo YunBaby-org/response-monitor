@@ -88,12 +88,7 @@ export default class Application {
             time: new Date(),
             response: response_text,
           };
-          this.buffer!.add(
-            save,
-            this.onResponseSaveSuccess,
-            this.onResponseSaveFailure,
-            message
-          );
+          this.buffer!.add(save, message);
 
           /* Send it back to queue */
           const key = `tracker.${trackerId}.notification.respond`;
