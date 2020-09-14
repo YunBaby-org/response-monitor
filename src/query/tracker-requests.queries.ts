@@ -1,14 +1,21 @@
 /** Types generated for queries found in "src/query/tracker-requests.sql" */
-import { PreparedQuery } from '@pgtyped/query';
+import {PreparedQuery} from '@pgtyped/query';
 
-export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+export type Json =
+  | null
+  | boolean
+  | number
+  | string
+  | Json[]
+  | {[key: string]: Json};
 
 /** 'InsertRequest' parameters type */
 export interface IInsertRequestParams {
   requests: Array<{
-    id: string | null | void,
-    time: Date | null | void,
-    request: Json | null | void
+    tracker_id: string | null | void;
+    id: string | null | void;
+    time: Date | null | void;
+    request: Json | null | void;
   }>;
 }
 
@@ -21,24 +28,48 @@ export interface IInsertRequestQuery {
   result: IInsertRequestResult;
 }
 
-const insertRequestIR: any = {"name":"insertRequest","params":[{"name":"requests","codeRefs":{"defined":{"a":35,"b":42,"line":3,"col":9},"used":[{"a":158,"b":165,"line":6,"col":10}]},"transform":{"type":"pick_array_spread","keys":["id","time","request"]}}],"usedParamSet":{"requests":true},"statement":{"body":"INSERT INTO public.tracker_requests(request_id, delivery_time, request)\n  VALUES :requests","loc":{"a":76,"b":165,"line":5,"col":0}}};
+const insertRequestIR: any = {
+  name: 'insertRequest',
+  params: [
+    {
+      name: 'requests',
+      codeRefs: {
+        defined: {a: 35, b: 42, line: 3, col: 9},
+        used: [{a: 181, b: 188, line: 6, col: 10}],
+      },
+      transform: {
+        type: 'pick_array_spread',
+        keys: ['tracker_id', 'id', 'time', 'request'],
+      },
+    },
+  ],
+  usedParamSet: {requests: true},
+  statement: {
+    body:
+      'INSERT INTO public.tracker_requests(trackerid, request_id, delivery_time, request)\n  VALUES :requests',
+    loc: {a: 88, b: 188, line: 5, col: 0},
+  },
+};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO public.tracker_requests(request_id, delivery_time, request)
+ * INSERT INTO public.tracker_requests(trackerid, request_id, delivery_time, request)
  *   VALUES :requests
  * ```
  */
-export const insertRequest = new PreparedQuery<IInsertRequestParams,IInsertRequestResult>(insertRequestIR);
-
+export const insertRequest = new PreparedQuery<
+  IInsertRequestParams,
+  IInsertRequestResult
+>(insertRequestIR);
 
 /** 'InsertResponse' parameters type */
 export interface IInsertResponseParams {
   responses: Array<{
-    id: string | null | void,
-    time: Date | null | void,
-    response: Json | null | void
+    tracker_id: string | null | void;
+    id: string | null | void;
+    time: Date | null | void;
+    response: Json | null | void;
   }>;
 }
 
@@ -51,18 +82,40 @@ export interface IInsertResponseQuery {
   result: IInsertResponseResult;
 }
 
-const insertResponseIR: any = {"name":"insertResponse","params":[{"name":"responses","codeRefs":{"defined":{"a":205,"b":213,"line":10,"col":9},"used":[{"a":331,"b":339,"line":13,"col":10}]},"transform":{"type":"pick_array_spread","keys":["id","time","response"]}}],"usedParamSet":{"responses":true},"statement":{"body":"INSERT INTO public.tracker_requests(request_id, received_time, response)\n  VALUES :responses\n  ON CONFLICT (request_id) DO UPDATE SET\n    received_time = excluded.received_time,\n    response      = excluded.response","loc":{"a":248,"b":462,"line":12,"col":0}}};
+const insertResponseIR: any = {
+  name: 'insertResponse',
+  params: [
+    {
+      name: 'responses',
+      codeRefs: {
+        defined: {a: 228, b: 236, line: 10, col: 9},
+        used: [{a: 377, b: 385, line: 13, col: 10}],
+      },
+      transform: {
+        type: 'pick_array_spread',
+        keys: ['tracker_id', 'id', 'time', 'response'],
+      },
+    },
+  ],
+  usedParamSet: {responses: true},
+  statement: {
+    body:
+      'INSERT INTO public.tracker_requests(trackerid, request_id, received_time, response)\n  VALUES :responses\n  ON CONFLICT (request_id) DO UPDATE SET\n    received_time = excluded.received_time,\n    response      = excluded.response',
+    loc: {a: 283, b: 508, line: 12, col: 0},
+  },
+};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO public.tracker_requests(request_id, received_time, response)
+ * INSERT INTO public.tracker_requests(trackerid, request_id, received_time, response)
  *   VALUES :responses
  *   ON CONFLICT (request_id) DO UPDATE SET
  *     received_time = excluded.received_time,
  *     response      = excluded.response
  * ```
  */
-export const insertResponse = new PreparedQuery<IInsertResponseParams,IInsertResponseResult>(insertResponseIR);
-
-
+export const insertResponse = new PreparedQuery<
+  IInsertResponseParams,
+  IInsertResponseResult
+>(insertResponseIR);

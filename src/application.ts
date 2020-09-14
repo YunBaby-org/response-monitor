@@ -129,6 +129,7 @@ export default class Application {
         {
           /* insert response into buffer */
           const save = {
+            tracker_id: trackerId,
             id: response.id,
             time: new Date(),
             response: response_text,
@@ -171,7 +172,7 @@ export default class Application {
     try {
       const responses = {responses: buffer.responseBuffer};
       const run = insertResponse.run(responses, this.client!);
-      run
+      await run
         .then(() => {
           const messages = buffer.state as object[];
           const lastMessage = messages[messages.length - 1];
@@ -192,7 +193,7 @@ export default class Application {
           const message = buffer.state[index] as amqp.ConsumeMessage;
 
           /* Attempts to store the single response into db */
-          insertResponse
+          await insertResponse
             .run({responses: [response]}, this.client!)
             .then(() => {
               /* Success: we ack it */
