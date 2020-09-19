@@ -74,17 +74,21 @@ export default class Application {
   }
 
   private async stop() {
-    function PretendNothingHappened() {}
     if (!this.stopped) {
       this.stopped = true;
       if (this.looper) {
         this.looper.stopLooper();
       }
       appLogger.info('Stopping response monitor...');
-      appLogger.info('Closing RabbitMQ connection');
-      await this.amqpConnection!.close().catch(PretendNothingHappened);
-      appLogger.info('Closing Postgres connection');
-      await this.client!.end().catch(PretendNothingHappened);
+      appLogger.info('Closing RabbitMQ & Postgres connection');
+      await this.amqpConnection!.close()
+        .timeout(5000, 'AMQP connection timeouted')
+        .catch(error => {
+          appLogger.error(error);
+        });
+      await this.client!.end().catch(error => {
+        appLogger.error(error);
+      });
       appLogger.info('Done');
     }
   }
