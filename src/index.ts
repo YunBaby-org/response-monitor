@@ -4,7 +4,7 @@ import {appLogger} from './loggers';
 import {getRabbitURI, getPostgresURI} from './credentials';
 
 async function waitDependencies() {
-  const opt = {timeout: 30000};
+  const opt = {timeout: 60_000};
   await Promise.all([waitRabbitMQ(opt), waitPostgres(opt)]);
 }
 
