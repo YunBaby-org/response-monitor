@@ -126,7 +126,8 @@ export default class Application {
       case 'GetPowerStatus':
       case 'GetVersion':
       case 'ScanGPS':
-      case 'ScanWifiSignal':
+      case 'ScanWifiSignal_Resolved':
+      case 'ScanWifiSignal_Resolved_Failure':
       case 'SetAutoReport':
       case 'SetPowerSaving':
       case 'SetReportInterval':
@@ -144,6 +145,14 @@ export default class Application {
           const key = `tracker.${trackerId}.notification.respond`;
           this.amqpChannel!.publish('tracker-event', key, message.content);
         }
+        break;
+      case 'ScanWifiSignal':
+        /* Redirect message to Locating Server */
+        this.amqpChannel!.publish(
+          'locating-server',
+          trackerId,
+          message.content
+        );
         break;
       default:
         throw new UnknownResponseError();

@@ -16,4 +16,6 @@ export type ResponseType =
   | 'ScanWifiSignal'
   | 'SetAutoReport'
   | 'SetPowerSaving'
-  | 'SetReportInterval';
+  | 'SetReportInterval'
+  | 'ScanWifiSignal_Resolved'
+  | 'ScanWifiSignal_Resolved_Failure';
