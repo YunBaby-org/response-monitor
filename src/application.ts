@@ -175,11 +175,9 @@ export default class Application {
       this.looper!.addNextInterval(-80, 50, 300);
     } else if (buffer.responseBuffer.length === 0) {
       /* No traffic, Make queue slower by adjust interval */
-      this.looper!.addNextInterval(30, 50, 300);
+      this.looper!.addNextInterval(30, 50, 800);
       return;
     }
-
-    appLogger.debug(`Refresh buffer with size ${buffer.responseBuffer.length}`);
 
     /* Attempts to save current responses to database */
     try {
@@ -190,6 +188,7 @@ export default class Application {
           const messages = buffer.state as object[];
           const lastMessage = messages[messages.length - 1];
           this.onResponseSaveSuccess(lastMessage, true);
+          appLogger.debug(`Ack ${buffer.responseBuffer.length} messages`);
         })
         .catch(error => {
           throw error;
@@ -234,7 +233,6 @@ export default class Application {
   }
 
   private onResponseSaveSuccess(message: object, all = false) {
-    appLogger.info(`Ack ${all ? 'all messages' : '1 message'}`);
     this.amqpChannel!.ack(message as amqp.ConsumeMessage, all);
   }
 }
