@@ -23,4 +23,15 @@ async function setup() {
   app.start();
 }
 
+process.on('unhandledRejection', reason => {
+  appLogger.error('Unhandled rejection occurred');
+  appLogger.error(reason);
+  appLogger.error('Force stop response monitor');
+});
+process.on('uncaughtException', error => {
+  appLogger.error('Uncaught exception occurred');
+  appLogger.error(error);
+  appLogger.error('Force stop response monitor');
+});
+
 setup();
